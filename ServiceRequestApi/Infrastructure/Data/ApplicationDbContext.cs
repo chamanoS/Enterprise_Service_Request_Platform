@@ -70,6 +70,8 @@ namespace ServiceRequestApi.Infrastructure.Data
                 .HasOne(sr => sr.Status)
                 .WithMany(s => s.ServiceRequests)
                 .HasForeignKey(sr => sr.StatusId);
+
+           
         }
     }
 }

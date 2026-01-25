@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations; // needed for [Key]
 
 namespace ServiceRequestApi.Models.Entities
 {
@@ -9,8 +10,11 @@ namespace ServiceRequestApi.Models.Entities
     /// </summary>
     public class RequestStatus
     {
+        [Key] 
         public int StatusId { get; set; }
+
         public string StatusName { get; set; }
+
         public ICollection<ServiceRequest> ServiceRequests { get; set; }
     }
 }

@@ -1,5 +1,5 @@
 using System;
-
+using System.ComponentModel.DataAnnotations;
 namespace ServiceRequestApi.Models.Entities
 {
     /// <summary>
@@ -9,9 +9,7 @@ namespace ServiceRequestApi.Models.Entities
     /// </summary>
     public class ServiceRequest
     {
-        // =====================
-        // Primary Key
-        // =====================
+         [Key]  // <-- This is required
         public int RequestId { get; set; }
 
         // =====================
