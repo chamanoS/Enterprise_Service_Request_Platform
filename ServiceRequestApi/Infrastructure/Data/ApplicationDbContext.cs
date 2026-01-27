@@ -59,17 +59,21 @@ namespace ServiceRequestApi.Infrastructure.Data
             modelBuilder.Entity<ServiceRequest>()
                 .HasOne(sr => sr.User)
                 .WithMany(u => u.ServiceRequests)
-                .HasForeignKey(sr => sr.UserId);
+                .HasForeignKey(sr => sr.UserId)
+                .OnDelete(DeleteBehavior.Restrict); // <- Disable cascade delete
 
             modelBuilder.Entity<ServiceRequest>()
                 .HasOne(sr => sr.Department)
                 .WithMany(d => d.ServiceRequests)
-                .HasForeignKey(sr => sr.DepartmentId);
+                .HasForeignKey(sr => sr.DepartmentId)
+                .OnDelete(DeleteBehavior.Restrict); // <- Optional
 
             modelBuilder.Entity<ServiceRequest>()
                 .HasOne(sr => sr.Status)
                 .WithMany(s => s.ServiceRequests)
-                .HasForeignKey(sr => sr.StatusId);
+                .HasForeignKey(sr => sr.StatusId)
+                .OnDelete(DeleteBehavior.Restrict); // <- optional
+
 
            
         }

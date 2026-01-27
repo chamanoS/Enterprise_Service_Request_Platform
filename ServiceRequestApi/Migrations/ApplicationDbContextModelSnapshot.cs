@@ -161,19 +161,19 @@ namespace ServiceRequestApi.Migrations
                     b.HasOne("ServiceRequestApi.Models.Entities.Department", "Department")
                         .WithMany("ServiceRequests")
                         .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("ServiceRequestApi.Models.Entities.RequestStatus", "Status")
                         .WithMany("ServiceRequests")
                         .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("ServiceRequestApi.Models.Entities.User", "User")
                         .WithMany("ServiceRequests")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Department");
