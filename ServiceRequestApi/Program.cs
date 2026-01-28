@@ -1,6 +1,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using ServiceRequestApi.Infrastructure.Data;
+using ServiceRequestApi.Services.Users;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")
     )
 );
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
