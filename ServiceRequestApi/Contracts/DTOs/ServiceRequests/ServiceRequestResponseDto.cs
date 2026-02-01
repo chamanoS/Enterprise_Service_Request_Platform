@@ -1,15 +1,24 @@
+using System;
+
 namespace ServiceRequestApi.Contracts.DTOs.ServiceRequests
 {
-/// <summary>
-/// Data returned when a service request is queried.
-/// </summary>
-public class ServiceRequestResponseDto
-{
-public int RequestId { get; set; }
-public string Title { get; set; }
-public string Status { get; set; }
-public string Department { get; set; }
-public string CreatedBy { get; set; }
-public string CreatedDate { get; set; }
-}
+    /// <summary>
+    /// DTO returned to the client when reading service requests
+    /// </summary>
+    public class ServiceRequestResponseDto
+    {
+        public int ServiceRequestId { get; set; }
+
+        public string Title { get; set; }
+        public string Description { get; set; }
+
+        public DateTime CreatedDate { get; set; }
+        public DateTime? ClosedDate { get; set; }
+
+        public string Status { get; set; }
+        public string Department { get; set; }
+
+        public int UserId { get; set; }
+        public string Username { get; set; }
+    }
 }
