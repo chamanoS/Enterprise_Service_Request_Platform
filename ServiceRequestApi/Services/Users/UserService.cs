@@ -41,7 +41,7 @@ namespace ServiceRequestApi.Services.Users
 
             var department = await _context.Departments
             .Where(d => d.DepartmentId == user.DepartmentId)
-            .Select(d => d.Name)
+            .Select(d => d.DepartmentName)
             .FirstAsync();
 
 
@@ -67,7 +67,7 @@ namespace ServiceRequestApi.Services.Users
                 UserId = u.UserId,
                 FullName = u.FirstName + " " + u.LastName,
                 Email = u.Email,
-                Department = u.Department.Name
+                Department = u.Department.DepartmentName
             })
             .ToListAsync();
         }
@@ -86,7 +86,7 @@ namespace ServiceRequestApi.Services.Users
                 UserId = u.UserId,
                 FullName = u.FirstName + " " + u.LastName,
                 Email = u.Email,
-                Department = u.Department.Name
+                Department = u.Department.DepartmentName
             })
             .FirstOrDefaultAsync();
         }
