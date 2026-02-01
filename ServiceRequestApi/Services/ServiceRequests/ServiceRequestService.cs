@@ -9,10 +9,6 @@ using ServiceRequestApi.Models.Entities;
 
 namespace ServiceRequestApi.Services.ServiceRequests
 {
-    /// <summary>
-    /// Implements business logic for Service Requests.
-    /// This layer coordinates validation, persistence, and mapping.
-    /// </summary>
     public class ServiceRequestService : IServiceRequestService
     {
         private readonly ApplicationDbContext _context;
@@ -22,33 +18,26 @@ namespace ServiceRequestApi.Services.ServiceRequests
             _context = context;
         }
 
-        // ---------------------------------
+        // -----------------------
         // CREATE
-        // ---------------------------------
+        // -----------------------
         public async Task<ServiceRequestResponseDto> CreateAsync(CreateServiceRequestDto dto)
         {
-            // Validate User
-            var user = await _context.Users
-                .Include(u => u.Department)
-                .FirstOrDefaultAsync(u => u.UserId == dto.UserId);
-
-            if (user == null)
-            {
+            // Validate user exists
+            var userExists = await _context.Users.AnyAsync(u => u.UserId == dto.UserId);
+            if (!userExists)
                 throw new InvalidOperationException("User not found.");
-            }
 
-            // Validate Department
+            // Validate department exists
             var department = await _context.Departments
                 .FirstOrDefaultAsync(d => d.DepartmentId == dto.DepartmentId);
 
             if (department == null)
-            {
                 throw new InvalidOperationException("Department not found.");
-            }
 
-            // Default status: Open
-            var openStatus = await _context.RequestStatuses
-                .FirstAsync(rs => rs.StatusName == "Open");
+            // Default status: New (matches your seeding)
+            var newStatus = await _context.RequestStatuses
+                .FirstAsync(s => s.StatusName == "New");
 
             var serviceRequest = new ServiceRequest
             {
@@ -56,95 +45,90 @@ namespace ServiceRequestApi.Services.ServiceRequests
                 Description = dto.Description,
                 UserId = dto.UserId,
                 DepartmentId = dto.DepartmentId,
-                RequestStatusId = openStatus.RequestStatusId,
+                StatusId = newStatus.StatusId,
                 CreatedDate = DateTime.UtcNow
             };
 
             _context.ServiceRequests.Add(serviceRequest);
             await _context.SaveChangesAsync();
 
+            // Load username (keep it simple for now)
+            var username = await _context.Users
+                .Where(u => u.UserId == dto.UserId)
+                .Select(u => u.Username)
+                .FirstAsync();
+
             return new ServiceRequestResponseDto
             {
-                ServiceRequestId = serviceRequest.ServiceRequestId,
+                RequestId = serviceRequest.RequestId,
                 Title = serviceRequest.Title,
                 Description = serviceRequest.Description,
                 CreatedDate = serviceRequest.CreatedDate,
-                Status = openStatus.StatusName,
-                Department = department.DepartmentName,
-                UserId = user.UserId,
-                Username = user.Username
+                Status = newStatus.StatusName,
+                Department = department.DepartmentName,   // make sure Department has DepartmentName
+                UserId = dto.UserId,
+                Username = username
             };
         }
 
-        // ---------------------------------
+        // -----------------------
         // READ ALL
-        // ---------------------------------
+        // -----------------------
         public async Task<IEnumerable<ServiceRequestResponseDto>> GetAllAsync()
         {
             return await _context.ServiceRequests
-                .Include(sr => sr.RequestStatus)
+                .Include(sr => sr.Status)
                 .Include(sr => sr.Department)
                 .Include(sr => sr.User)
                 .Select(sr => new ServiceRequestResponseDto
                 {
-                    ServiceRequestId = sr.ServiceRequestId,
+                    RequestId = sr.RequestId,
                     Title = sr.Title,
                     Description = sr.Description,
                     CreatedDate = sr.CreatedDate,
-                    ClosedDate = sr.ClosedDate,
-                    Status = sr.RequestStatus.StatusName,
+                    Status = sr.Status.StatusName,
                     Department = sr.Department.DepartmentName,
-                    UserId = sr.User.UserId,
+                    UserId = sr.UserId,
                     Username = sr.User.Username
                 })
                 .ToListAsync();
         }
 
-        // ---------------------------------
+        // -----------------------
         // READ BY ID
-        // ---------------------------------
-        public async Task<ServiceRequestResponseDto?> GetByIdAsync(int serviceRequestId)
+        // -----------------------
+        public async Task<ServiceRequestResponseDto?> GetByIdAsync(int requestId)
         {
             return await _context.ServiceRequests
-                .Include(sr => sr.RequestStatus)
+                .Include(sr => sr.Status)
                 .Include(sr => sr.Department)
                 .Include(sr => sr.User)
-                .Where(sr => sr.ServiceRequestId == serviceRequestId)
+                .Where(sr => sr.RequestId == requestId)
                 .Select(sr => new ServiceRequestResponseDto
                 {
-                    ServiceRequestId = sr.ServiceRequestId,
+                    RequestId = sr.RequestId,
                     Title = sr.Title,
                     Description = sr.Description,
                     CreatedDate = sr.CreatedDate,
-                    ClosedDate = sr.ClosedDate,
-                    Status = sr.RequestStatus.StatusName,
+                    Status = sr.Status.StatusName,
                     Department = sr.Department.DepartmentName,
-                    UserId = sr.User.UserId,
+                    UserId = sr.UserId,
                     Username = sr.User.Username
                 })
                 .FirstOrDefaultAsync();
         }
 
-        // ---------------------------------
-        // CLOSE REQUEST (optional)
-        // ---------------------------------
-        public async Task<bool> CloseAsync(int serviceRequestId)
+        // -----------------------
+        // CLOSE (optional)
+        // -----------------------
+        public async Task<bool> CloseAsync(int requestId)
         {
-            var serviceRequest = await _context.ServiceRequests
-                .Include(sr => sr.RequestStatus)
-                .FirstOrDefaultAsync(sr => sr.ServiceRequestId == serviceRequestId);
+            var sr = await _context.ServiceRequests.FirstOrDefaultAsync(x => x.RequestId == requestId);
+            if (sr == null) return false;
 
-            if (serviceRequest == null)
-            {
-                return false;
-            }
+            var closed = await _context.RequestStatuses.FirstAsync(s => s.StatusName == "Closed");
 
-            var closedStatus = await _context.RequestStatuses
-                .FirstAsync(rs => rs.StatusName == "Closed");
-
-            serviceRequest.RequestStatusId = closedStatus.RequestStatusId;
-            serviceRequest.ClosedDate = DateTime.UtcNow;
-
+            sr.StatusId = closed.StatusId;
             await _context.SaveChangesAsync();
             return true;
         }
