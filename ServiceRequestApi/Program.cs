@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ServiceRequestApi.Infrastructure.Data;
 using ServiceRequestApi.Services.Users;
+using ServiceRequestApi.Services.ServiceRequests;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,10 +13,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     )
 );
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IServiceRequestService, ServiceRequestService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
-
 
 
 var app = builder.Build();
