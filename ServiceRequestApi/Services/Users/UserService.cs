@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using ServiceRequestApi.Contracts.DTOs.Users;
 using ServiceRequestApi.Infrastructure.Data;
 using ServiceRequestApi.Models.Entities;
+using Microsoft.AspNetCore.Identity;
 
 
 namespace ServiceRequestApi.Services.Users
@@ -24,7 +25,7 @@ namespace ServiceRequestApi.Services.Users
         {
             _context = context;
         }
-        public async Task<UserResponseDto> CreateUserAsync(CreateUserDto dto)
+    
         {
             var user = new User
             {
@@ -35,23 +36,55 @@ namespace ServiceRequestApi.Services.Users
             };
 
 
-            _context.Users.Add(user);
+        _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
 
-            var department = await _context.Departments
-            .Where(d => d.DepartmentId == user.DepartmentId)
-            .Select(d => d.DepartmentName)
-            .FirstAsync();
+        var department = await _context.Departments
+        .Where(d => d.DepartmentId == user.DepartmentId)
+        .Select(d => d.DepartmentName)
+        .FirstAsync();
 
 
             return new UserResponseDto
             {
-                UserId = user.UserId,
+            UserId = user.UserId,
                 FullName = $"{user.FirstName} {user.LastName}",
                 Email = user.Email,
                 Department = department
+        };
+        }
+
+public async Task<UserResponseDto> CreateUserAsync(CreateUserDto dto)
+        {
+            var user = new User
+            {
+                Username = dto.Username,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Email = dto.Email,
+                DepartmentId = dto.DepartmentId,
+                IsActive = true
             };
+
+            // Hash password (DO NOT store plaintext)
+            var hasher = new PasswordHasher<User>();
+            user.PasswordHash = hasher.HashPassword(user, dto.Password);
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+
+            return await _context.Users
+                .Include(u => u.Department)
+                .Where(u => u.UserId == user.UserId)
+                .Select(u => new UserResponseDto
+                {
+                    UserId = u.UserId,
+                    FullName = u.FirstName + " " + u.LastName,
+                    Email = u.Email,
+                    Department = u.Department.DepartmentName
+                })
+                .FirstAsync();
         }
 
 
