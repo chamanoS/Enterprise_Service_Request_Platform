@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using ServiceRequestApi.Infrastructure.Data;
 using ServiceRequestApi.Services.Users;
 using ServiceRequestApi.Services.ServiceRequests;
+using ServiceRequestApi.Middleware;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,5 +39,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.Run();
