@@ -1,18 +1,19 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace ServiceRequestApi.Contracts.DTOs.ServiceRequests
 {
-    /// <summary>
-    /// DTO used when creating a new service request
-    /// (input from client)
-    /// </summary>
     public class CreateServiceRequestDto
     {
+        [Required, MinLength(3)]
         public string Title { get; set; }
+
+        [Required, MinLength(5)]
         public string Description { get; set; }
 
-        // Who is creating the request
+        [Range(1, int.MaxValue)]
         public int UserId { get; set; }
 
-        // Which department handles it
+        [Range(1, int.MaxValue)]
         public int DepartmentId { get; set; }
     }
 }
