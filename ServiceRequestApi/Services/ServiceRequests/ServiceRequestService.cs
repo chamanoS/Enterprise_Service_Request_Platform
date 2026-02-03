@@ -66,7 +66,6 @@ namespace ServiceRequestApi.Services.ServiceRequests
                 CreatedDate = serviceRequest.CreatedDate,
                 Status = newStatus.StatusName,
                 Department = department.DepartmentName,   // make sure Department has DepartmentName
-                UserId = dto.UserId,
                 Username = username
             };
         }
