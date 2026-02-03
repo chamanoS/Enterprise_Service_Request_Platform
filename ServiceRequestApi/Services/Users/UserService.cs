@@ -1,62 +1,38 @@
 using System.Collections.Generic;
-
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ServiceRequestApi.Contracts.DTOs.Users;
 using ServiceRequestApi.Infrastructure.Data;
 using ServiceRequestApi.Models.Entities;
-using Microsoft.AspNetCore.Identity;
-
 
 namespace ServiceRequestApi.Services.Users
 {
-    /// <summary>
-    /// Implements user-related business logic.
-    /// Handles mapping between DTOs and entities.
-    /// </summary>
     public class UserService : IUserService
     {
         private readonly ApplicationDbContext _context;
-
 
         public UserService(ApplicationDbContext context)
         {
             _context = context;
         }
-    
+
+        public async Task<UserResponseDto> CreateUserAsync(CreateUserDto dto)
         {
-            var user = new User
-            {
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Email = dto.Email,
-                DepartmentId = dto.DepartmentId
-            };
+            // Basic validation
+            if (string.IsNullOrWhiteSpace(dto.Username))
+                throw new InvalidOperationException("Username is required.");
 
+            if (string.IsNullOrWhiteSpace(dto.Password))
+                throw new InvalidOperationException("Password is required.");
 
-        _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            // Optional: prevent duplicate usernames
+            var usernameExists = await _context.Users.AnyAsync(u => u.Username == dto.Username);
+            if (usernameExists)
+                throw new InvalidOperationException("Username already exists.");
 
-
-        var department = await _context.Departments
-        .Where(d => d.DepartmentId == user.DepartmentId)
-        .Select(d => d.DepartmentName)
-        .FirstAsync();
-
-
-            return new UserResponseDto
-            {
-            UserId = user.UserId,
-                FullName = $"{user.FirstName} {user.LastName}",
-                Email = user.Email,
-                Department = department
-        };
-        }
-
-public async Task<UserResponseDto> CreateUserAsync(CreateUserDto dto)
-        {
+            // Create entity
             var user = new User
             {
                 Username = dto.Username,
@@ -67,13 +43,14 @@ public async Task<UserResponseDto> CreateUserAsync(CreateUserDto dto)
                 IsActive = true
             };
 
-            // Hash password (DO NOT store plaintext)
+            // Hash password (never store plain passwords)
             var hasher = new PasswordHasher<User>();
             user.PasswordHash = hasher.HashPassword(user, dto.Password);
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
+            // Return DTO (load department name)
             return await _context.Users
                 .Include(u => u.Department)
                 .Where(u => u.UserId == user.UserId)
@@ -87,41 +64,33 @@ public async Task<UserResponseDto> CreateUserAsync(CreateUserDto dto)
                 .FirstAsync();
         }
 
-
-        // -----------------------
-        // Get All Users
-        // -----------------------
         public async Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()
         {
             return await _context.Users
-            .Include(u => u.Department)
-            .Select(u => new UserResponseDto
-            {
-                UserId = u.UserId,
-                FullName = u.FirstName + " " + u.LastName,
-                Email = u.Email,
-                Department = u.Department.DepartmentName
-            })
-            .ToListAsync();
+                .Include(u => u.Department)
+                .Select(u => new UserResponseDto
+                {
+                    UserId = u.UserId,
+                    FullName = u.FirstName + " " + u.LastName,
+                    Email = u.Email,
+                    Department = u.Department.DepartmentName
+                })
+                .ToListAsync();
         }
 
-
-        // -----------------------
-        // Get User By Id
-        // -----------------------
         public async Task<UserResponseDto> GetUserByIdAsync(int userId)
         {
             return await _context.Users
-            .Include(u => u.Department)
-            .Where(u => u.UserId == userId)
-            .Select(u => new UserResponseDto
-            {
-                UserId = u.UserId,
-                FullName = u.FirstName + " " + u.LastName,
-                Email = u.Email,
-                Department = u.Department.DepartmentName
-            })
-            .FirstOrDefaultAsync();
+                .Include(u => u.Department)
+                .Where(u => u.UserId == userId)
+                .Select(u => new UserResponseDto
+                {
+                    UserId = u.UserId,
+                    FullName = u.FirstName + " " + u.LastName,
+                    Email = u.Email,
+                    Department = u.Department.DepartmentName
+                })
+                .FirstOrDefaultAsync();
         }
     }
 }
