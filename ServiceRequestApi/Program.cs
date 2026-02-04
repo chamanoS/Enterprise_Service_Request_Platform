@@ -4,6 +4,9 @@ using ServiceRequestApi.Infrastructure.Data;
 using ServiceRequestApi.Services.Users;
 using ServiceRequestApi.Services.ServiceRequests;
 using ServiceRequestApi.Middleware;
+using ServiceRequestApi.Services.Auth;
+
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +18,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 );
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IServiceRequestService, ServiceRequestService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
