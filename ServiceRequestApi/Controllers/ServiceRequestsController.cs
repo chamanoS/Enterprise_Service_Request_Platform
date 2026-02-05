@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ServiceRequestApi.Contracts.DTOs.ServiceRequests;
 using ServiceRequestApi.Services.ServiceRequests;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace ServiceRequestApi.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class ServiceRequestsController : ControllerBase
@@ -52,6 +55,7 @@ namespace ServiceRequestApi.Controllers
 
         // PATCH: api/servicerequests/{requestId}/close
         // Optional endpoint (since you already have CloseAsync)
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{requestId:int}/close")]
         public async Task<IActionResult> Close(int requestId)
         {
