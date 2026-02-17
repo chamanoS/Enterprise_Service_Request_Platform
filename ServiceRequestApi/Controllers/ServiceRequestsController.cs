@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using ServiceRequestApi.Contracts.DTOs.ServiceRequests;
 using ServiceRequestApi.Services.ServiceRequests;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+
 
 
 namespace ServiceRequestApi.Controllers
