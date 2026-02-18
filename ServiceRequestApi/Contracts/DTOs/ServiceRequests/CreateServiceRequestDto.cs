@@ -10,8 +10,8 @@ namespace ServiceRequestApi.Contracts.DTOs.ServiceRequests
         [Required, MinLength(5)]
         public string Description { get; set; }
 
-        [Range(1, int.MaxValue)]
-        public int UserId { get; set; }
+        // [Range(1, int.MaxValue)]
+        // public int UserId { get; set; }
 
         [Range(1, int.MaxValue)]
         public int DepartmentId { get; set; }

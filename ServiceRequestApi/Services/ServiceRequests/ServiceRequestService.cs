@@ -21,10 +21,10 @@ namespace ServiceRequestApi.Services.ServiceRequests
         // -----------------------
         // CREATE
         // -----------------------
-        public async Task<ServiceRequestResponseDto> CreateAsync(CreateServiceRequestDto dto)
+        public async Task<ServiceRequestResponseDto> CreateAsync(CreateServiceRequestDto dto, int userId)
         {
             // Validate user exists
-            var userExists = await _context.Users.AnyAsync(u => u.UserId == dto.UserId);
+            var userExists = await _context.Users.AnyAsync(u => u.UserId == userId);
             if (!userExists)
                 throw new InvalidOperationException("User not found.");
 
@@ -43,7 +43,7 @@ namespace ServiceRequestApi.Services.ServiceRequests
             {
                 Title = dto.Title,
                 Description = dto.Description,
-                UserId = dto.UserId,
+                UserId = userId,
                 DepartmentId = dto.DepartmentId,
                 StatusId = newStatus.StatusId,
                 CreatedDate = DateTime.UtcNow
@@ -54,7 +54,7 @@ namespace ServiceRequestApi.Services.ServiceRequests
 
             // Load username (keep it simple for now)
             var username = await _context.Users
-                .Where(u => u.UserId == dto.UserId)
+                .Where(u => u.UserId == userId)
                 .Select(u => u.Username)
                 .FirstAsync();
 

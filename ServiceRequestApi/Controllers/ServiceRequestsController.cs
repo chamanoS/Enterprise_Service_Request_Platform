@@ -23,17 +23,19 @@ namespace ServiceRequestApi.Controllers
         }
 
         // POST: api/servicerequests
-        [HttpPost]
+       [HttpPost]
         public async Task<ActionResult<ServiceRequestResponseDto>> Create([FromBody] CreateServiceRequestDto dto)
         {
-            if (dto == null)
-                return BadRequest("Service request data is required.");
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var created = await _service.CreateAsync(dto);
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+                return Unauthorized("Invalid token: UserId claim missing.");
 
-            // returns 201 + Location header pointing to GET by id
+            var created = await _service.CreateAsync(dto, userId);
+
             return CreatedAtAction(nameof(GetById), new { requestId = created.RequestId }, created);
         }
+
 
         // GET: api/servicerequests
         [HttpGet]

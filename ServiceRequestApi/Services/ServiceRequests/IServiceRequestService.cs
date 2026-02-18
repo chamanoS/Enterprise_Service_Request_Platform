@@ -11,7 +11,7 @@ namespace ServiceRequestApi.Services.ServiceRequests
     public interface IServiceRequestService
     {
         // Create a new service request
-        Task<ServiceRequestResponseDto> CreateAsync(CreateServiceRequestDto dto);
+        Task<ServiceRequestResponseDto> CreateAsync(CreateServiceRequestDto dto, int userId);
 
         // Read operations
         Task<IEnumerable<ServiceRequestResponseDto>> GetAllAsync();
